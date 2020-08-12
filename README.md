@@ -8,7 +8,7 @@
 *First install the package*
 ```ts
 // package.json
-"dependencies": { "zustand-forms": "bitbucket:conduct/zustand-forms" }
+"dependencies": { "zustand-forms": "github:Conduct/zustand-forms" }
 ```
 *Then define a form*
 ```ts
