@@ -1,6 +1,6 @@
 {
   "name": "zustand-forms",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "**fast typesafe form states as zustand stores**",
   "main": "./lib/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/Conduct/zustand-forms/issues"
   },
-  "homepage": "https://github.com/Conduct/zustand-forms#readme"
+  "homepage": "https://github.com/Conduct/zustand-forms#readme",
   "typings": "./lib/index.d.ts",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.7.1",
