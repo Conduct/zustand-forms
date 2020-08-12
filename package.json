@@ -1,6 +1,6 @@
 {
   "name": "zustand-forms",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "**fast typesafe form states as zustand stores**",
   "main": "./lib/index.js",
   "scripts": {
@@ -12,12 +12,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/conduct/react-helpers-forms.git"
+    "url": "git+https://github.com/Conduct/zustand-forms.git"
   },
-  "keywords": ["form", "forms", "zustand", "react", "typescript", "validation"],
+  "keywords": [
+    "form",
+    "forms",
+    "zustand",
+    "react",
+    "typescript",
+    "validation"
+  ],
   "author": "Hugo McPhee",
   "license": "MIT",
-  "homepage": "https://github.com/Conduct/zustand-forms#readme",
+  "bugs": {
+    "url": "https://github.com/Conduct/zustand-forms/issues"
+  },
+  "homepage": "https://github.com/Conduct/zustand-forms#readme"
   "typings": "./lib/index.d.ts",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.7.1",
