@@ -1,5 +1,4 @@
 
-
 # zustand forms
 *fast typesafe form states as zustand stores*
 
@@ -13,9 +12,9 @@
 - ***platform independant*** - the same form definitions can be used for native and web
 
 featuring support for
-- ***serverside errors*** - all form state is in one place
+- ***serverside errors*** - all form state in one place
 - ***dynamic forms*** - toggle validators when showing/hiding inputs in a form, e.g `email` >next>  `password`
-- ***custom functionality*** - all low level state (like `timeUpdated`) is accessible for adding unique logic
+- ***custom functionality*** - accessible low level state like `timeUpdated` for adding custom logic
 
 ### Getting Started
 
