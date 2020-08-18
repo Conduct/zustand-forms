@@ -1,15 +1,21 @@
 
+
 # zustand forms
 *fast typesafe form states as zustand stores*
 
 ![Example](example.gif)
 
-- ***typesafe***, avoids typos and mismatching form names/inputIds + autocomplete convenience
-- ***separated state***, not tied to views or react components, accessible from any function
-- ***flexible validation***, supporting custom parameters and checking other form state
-- ***serverside errors***, all form state is in one place
-- ***platform independant***, the same form definitions can be used for native and web
+### Why?
 
+- ***typesafe*** -  avoids typos and mismatching form names/inputIds + autocomplete convenience
+- ***separated state*** - not tied to views or react components, accessible from any function
+- ***flexible validation*** - supports custom parameters and checking other form state
+- ***platform independant*** - the same form definitions can be used for native and web
+
+featuring support for
+- ***serverside errors*** - all form state is in one place
+- ***dynamic forms*** - toggle validators when showing/hiding inputs in a form, e.g `email` >next>  `password`
+- ***custom functionality*** - all low level state (like `timeUpdated`) is accessible for adding unique logic
 
 ### Getting Started
 
