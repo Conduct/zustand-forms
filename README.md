@@ -1,3 +1,4 @@
+
 # zustand forms
 *fast typesafe form states as zustand stores*
 
@@ -91,6 +92,12 @@ const SignupForm = () => {
     <>
       <FormInput formName="signup" inputId="email" />
       <FormInput formName="signup" inputId="password" />
+      <button
+        onClick={()=> signupApi(useSignupForm.getState().formValues)}
+        disabled={!isValid}
+      >
+        submit
+      </button>
     </>
   );
 };
