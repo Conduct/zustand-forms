@@ -4,6 +4,14 @@
 
 ![Example](example.gif)
 
+### Why zustand-forms?
+- *typesafe*, avoids typos and mismatching form names/inputIds + autocomplete convenience
+- *separated state*, not tied to views or react components, accessible from any function
+- *flexible validation*, supporting custom parameters and checking other form state
+- *serverside errors*, all form state is in one place
+- *platform independant*, the same form definitions can be used for native and web
+
+
 ### Getting Started
 
 ```ts
@@ -104,12 +112,6 @@ const SignupForm = () => {
 ```
 
 *(larger complete example with custom validators and more further down)*
-
-### Why zustand-forms?
-- *typesafe*, avoids typos and mismatching form names/inputIds + autocomplete convenience
-- *separated state*, not tied to views or react components, accessible from any function
-- *flexible validation*, supporting custom parameters and checking other form state
-- *serverside errors*, all form state is in one place
 
 ![The same form definition used for mobile and web](nativeandweb.png)  
 *The same form definition can be used for native and web*
