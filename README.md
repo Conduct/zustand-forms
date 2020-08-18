@@ -39,7 +39,7 @@ export const useSignupForm = makeFormStore({
   email: { valueType: "text", defaultValidators: ["required"] },
   password: { valueType: "text", defaultValidators: ["required"] },
 });
-
+// These form hooks can be used as-is, or a combined hook can be made below
 
 // Add all form stores keyed by form name
 const formStores = { login: useLoginForm, signup: useSignupForm };
@@ -55,7 +55,6 @@ export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; /
 ```
 *Then use with components*
 ```tsx
-type InputId = InputIdFromFormStore<typeof useLoginForm>;
 
 type Props<T_FormName, T_InputId> = {
   inputId: T_InputId;
@@ -93,7 +92,7 @@ const SignupForm = () => {
       <FormInput formName="signup" inputId="email" />
       <FormInput formName="signup" inputId="password" />
       <button
-        onClick={()=> signupApi(useSignupForm.getState().formValues)}
+        onClick={()=> anApi.signup(useSignupForm.getState().formValues)}
         disabled={!isValid}
       >
         submit
@@ -115,59 +114,32 @@ const SignupForm = () => {
 ![The same form definition used for mobile and web](nativeandweb.png)  
 *The same form definition can be used for native and web*
 
-# Recipes
+# Docs
 
-
-### Submitting a form
-```tsx
-import { useSignupForm } from "forms/signupForm";
-const SignupForm = () => <>
-	    <FormInput inputId="email" formName="signup"   />
-	    <FormInput inputId="newPassword" formName="signup"   />
-        <button onClick={() => {
-	       const { formValues } = useSignupForm.getState();
-	       serverApi.submit(formValues);
-	     }}> Submit </button>
-      </>
-```
-This example uses getState instead of using the hook to avoid rerenders when formValues update  
-The formValues object contains `{ email: "example@email.org", password: "123" }`
-
-### Disabling a submit button
-```tsx
-import { useSignupForm } from "forms/signupForm";
-function SignupForm() {
-  const isValid = useSignupForm((state) => state.isValid);
-  return <>
-	  <FormInput formName="signup" inputId="email" title="Email" />
-	  <FormInput formName="signup" inputId="newPassword" title="Password" />
-      <button disabled={!isValid}> Submit </button>
-      </>
-```
 
 ### Refreshing forms
-For accurate state, forms can be "refreshed" when becoming visible, which allows states like `isEdited` to be up to date.  
-Refreshing forms is also where setting **initial values** , **disabling validators**, and **updating server errors** can be done for inputs
-#### Initialising with values
+Refresh forms on mount to keep state like `isEdited` up-to-date.  
+Here  **initial values** , **disabling validators**, and **updating server errors** can also be set
+
 ```ts
 import { useSignupForm } from "forms/signupForm";
 function SignupForm() {
   const refreshForm = useSignupForm((state) => state.refreshForm);
-  useEffect(() => refreshForm({email: "initial@email.org"}), []);
+  useEffect(() => refreshForm(
+	{ email: "initial@email.org"},     // set initial values for inputs
+	{ password: false},                // disable validators
+	{ email: ["User already exists"]}, // add server errors
+	)
+  , []);
+  }
 ```
-#### Hiding inputs to validators
+
+### Validator utils
+For quick regex based validators,  
+It includes  `email` `aNumber` `aNonNumber` `anUppercaseLetter` `aLowercaseLetter` `aSpace`  regexes,   
+but more can be added/overwritten with the first parameter.
 ```ts
-  useEffect(() => refreshForm({}, {email: false}), []);
-```
-#### Adding server errors
-```ts
-  useEffect(() => refreshForm({}, {}, {email: ["email already registered"]} []);
-```
-### Using validator utils
-Use validator utils to quickly make regex based validators,  
-the included regex's are `email` `aNumber` `aNonNumber` `anUppercaseLetter` `aLowercaseLetter` `aSpace` but more can be added/overwritten with the first parameter of `makeValidatorUtils`
-```ts
-import { makeValidatorUtils } from "zustand-forms";
+import { makeValidatorUtils, makeValidator } from "zustand-forms";
 const {
   isString,
   isTypedString,
@@ -177,35 +149,38 @@ const {
   aCustomRegex: /\s\S/,
 });
 ```
-##### isTypedString
-`isTypedString` checks if the value is a non empty string, it can be useful for combining with string checks:  `if (isTypedString(value) && value.length > 5)`, most validators shouldn't return an error for an empty string if there's a seperate "required" validator
+and can be used like this
 ```ts
-import { makeValidator } from "zustand-forms";
 const validatorFunctions = {
-  atleastTwoCharacters: makeValidator(({ value }) => {
-    if (isTypedString(value) && value.length > 2) return "Required field"
-  })}
-```
-##### stringDoesntMatch / stringMatches
-`stringMatches` and `stringDoesntMatch` check if a typed string matches or doesn't match a named regex
-```ts
-import { makeValidator } from "zustand-forms";
-const validatorFunctions = {
+  // isTypedString
+  // checks if the value is a non empty string,
+  required: makeValidator(({ value }) =>
+    if (!isTypedString(value)) return "Required"
+  ),
+  // helpful to avoid errors for empty strings in other validators
+  underTenCharacters: makeValidator(({ value }) => {
+    if (isTypedString(value) && value.length > 10) return "Over max" // "" wont error here, but still will for *required*
+  })},
+  // stringDoesntMatch
+  // checks if it doesn't match a named regex
   email: makeValidator(({ value }) => {
     if (stringDoesntMatch(value, "email")) return "Please enter a valid email";
   })}
 ```
 
 ### Custom value types
-Custom value types can be used for values with multiple properties,  like `beachBall: { color: "green", size: 30 }`.
+For values with multiple properties  like `beachBall: { color: "green", size: 30 }`.
 ```
 const valueTypes = {
   text: { blankValue: "" },
   rotation: { blankValue: { x: 0, y: 0, z: 0 } },
 };
 ```
-Having default validators for custom value types can be useful,   
- use `getTypedMakeValidator`  instead of `makeValidator`  to have typed `value`s in validator functions
+
+
+To validate custom values in a typesafe way,  
+use `getTypedMakeValidator`  instead of `makeValidator`
+
 
 ```ts
 import { getTypedMakeValidator } from "zustand-forms";
@@ -214,10 +189,9 @@ const valueTypes = {
   text: { blankValue: "" },
   rotation: {
     blankValue: { x: 0, y: 0, z: 0 },
-    defaultValidators: ["allowedRotation" as "allowedRotation"] // For now names need types, but requirement might be removed
+    defaultValidators: ["allowedRotation" as "allowedRotation"] // TODO remove need for "as"
   },
 };
-
 const makeValidator = getTypedMakeValidator(valueTypes);
 
 const validatorFunctions = {
@@ -292,47 +266,9 @@ const validatorFunctions = {
 | | refreshForm  | `refreshForm(` `initialValuesByInputId`, `isCheckableByInputId`, `serverErrorsByInputId` `)`  | use when form components mount with `useEffect(, [])`
 
 
+## Example validators
 
-## Larger example
-Folder layout
 
-- 📂src
-  - 📂forms
-  - 📄 loginForm.ts
-  - 📄 signupForm.ts
-  - 📄 index.ts
-    - 📂options
-    - 📄 valueTypes.ts
-    - 📄 validatorFunctions
-    - 📄 index.ts (creates `makeFormStore`)
-   - 📂components
-     - 📄FormInput.tsx
-   - 📄App.tsx
-
-📄 valueTypes.ts
-```ts
-// Define value types
-const valueTypes = {
-  text: {
-    blankValue: "",
-    defaultValidators: [],
-    defaultValidatorsOptions: {},
-  },
-  number: {
-    blankValue: 0,
-    defaultValidators: [],
-    defaultValidatorsOptions: {},
-  },
-  boolean: {
-    blankValue: false,
-    defaultValidators: [],
-    defaultValidatorsOptions: {},
-  },
-};
-export default valueTypes;
-```
-
-📄 validatorFunctions.ts
 ```js
 // Define validator functions
 import { makeValidator as make, makeValidatorUtils } from "zustand-forms";
@@ -386,19 +322,8 @@ const validatorFunctions = {
 export default validatorFunctions;
 ```
 
-📄 options/index.ts
-```ts
-// Create the `makeFormStore` function
-import { makeMakeFormStore } from "zustand-forms";
-import validatorFunctions from "./validatorFunctions";
-import valueTypes from "./valueTypes";
 
-const makeFormStore = makeMakeFormStore(validatorFunctions, valueTypes);
-
-export default makeFormStore;
-```
-
-📄 signupForm.ts
+Using in a form
 ```ts
 import makeFormStore from "./options";
 
@@ -435,124 +360,26 @@ export const useSignupForm = makeFormStore({
 });
 ```
 
-📄 forms/index.ts
+## Example folder structure
+
+- 📂src
+  - 📂forms
+  - 📄 loginForm.ts
+  - 📄 signupForm.ts
+  - 📄 index.ts
+    - 📂options
+    - 📄 valueTypes.ts
+    - 📄 validatorFunctions
+    - 📄 index.ts (creates `makeFormStore`)
+   - 📂components
+     - 📄FormInput.tsx
+   - 📄App.tsx
 
 
-```ts
-// Optional forms helpers
-// can help for an any-form FormInput component
-import { useLoginForm } from "./loginForm"; // another example form (not shown)
-import { useSignupForm } from "./signupForm";
-import { makeFormHooks, MakeFormStoresHelperTypes } from "zustand-forms";
-
-// Add all form stores keyed by form name
-const formStores = {
-  login: useLoginForm,
-  signup: useSignupForm,
-};
-
-// Make forms hooks
-const { useFormInput } = makeFormHooks(formStores);
-export { useFormInput };
-
-// Make forms types
-type FormStoresHelperTypes = MakeFormStoresHelperTypes<typeof formStores>;
-export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
-export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; // InputIdByFormName["login"] -> "email" | "password"
-
-export default formStores;
-```
-📄 components/FormInput.ts
-```tsx
-import React from "react";
-import TextInput from "components/inputs/TextInput";
-import { useFormInput, FormName, InputIdByFormName } from "forms";
-
-type Props<T_FormName, T_InputId> = {
-  inputId: T_InputId;
-  formName: T_FormName;
-  title: string;
-};
-
-const FormInput = <
-  T_FormName extends FormName,
-  T_InputId extends InputIdByFormName[T_FormName]
->({
-  formName,
-  inputId,
-  title,
-}: Props<T_FormName, T_InputId>) => {
-  const {
-    onChange,
-    value,
-    onFocus,
-    onBlur,
-    inlineErrorTexts, // local and server error texts in an array
-    latestVisibleInlineErrorTexts, // same as inlineErrorTexts, but never empty, for fade transitions
-    isFocused,
-    hasVisibleErrors,
-  } = useFormInput({
-    inputId,
-    formName,
-  });
-
-  return (
-    <div css={styles.container}>
-      <div css={styles.title}>{title}</div>
-      <TextInput
-        {...{ onFocus, onBlur }}
-        onChange={onChange}
-        value={value as string}
-        style={{
-          borderTopColor: isFocused ? "rgb(204, 232, 231)" : undefined,
-          backgroundColor: isFocused ? "rgb(228, 255, 254)" : undefined,
-        }}
-      />
-      {
-        <div
-          css={styles.errors}
-          aria-hidden={!hasVisibleErrors}
-          style={{
-            height: hasVisibleErrors ? "16px" : "1px",
-            opacity: hasVisibleErrors ? "1" : "0",
-          }}
-        >
-          {latestVisibleInlineErrorTexts.join(", ")}
-        </div>
-      }
-    </div>
-  );
-};
-```
 
 
-📄 App.tsx
-```tsx
-import React, { useEffect } from "react";
-import "./App.css";
-import FormInput from "components/FormInput";
-import ExampleSubmitButton from "components/ExampleSubmitButton";
-import { useSignupForm } from "forms/signupForm";
 
-function App() {
-  const refreshSignupForm = useSignupForm((state) => state.refreshForm);
-  const isSignupFormValid = useSignupForm((state) => state.isValid);
-  useEffect(() => refreshSignupForm(), []);
-
-  return (
-    <div className="App">
-      <FormInput formName="signup" inputId="email" title="Signup email" />
-      <FormInput formName="signup" inputId="newPassword" title="Password" />
-      <FormInput formName="signup" inputId="confirmPassword" title="Confirm" />
-      <ExampleSubmitButton isValid={isSignupFormValid} />
-    </div>
-  );
-}
-```
 
 ## Development
-The easiest way to edit this package add `📂src` to your project as a renamed local folder like `📂zustand-forms-dev`, and replacing imports from `"zustand-forms"` to `"zustand-forms-dev"`.  
+For a quick way to edit this package, add `📂src` to your project as a renamed local folder like `📂zustand-forms-dev`, and replacing imports from `"zustand-forms"` to `"zustand-forms-dev"`.  
 Enabling `"baseUrl":` in `tsconfig.json` allows non-relative imports
-
-## TODO
-- update readme with more info
