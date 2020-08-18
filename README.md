@@ -5,12 +5,11 @@
 
 ### Getting Started
 
-*First install the package*
 ```ts
 // package.json
 "dependencies": { "zustand-forms": "github:Conduct/zustand-forms" }
 ```
-*Then define a form*
+
 ```ts
 import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
 
@@ -26,59 +25,79 @@ const validatorFunctions = {
     !value ? "Required field" : undefined
   ),
 };
-// Get form maker function
+
+// Define some forms 🗒
 const makeFormStore = makeMakeFormStore(validatorFunctions, valueTypes);
 
-// Make a form 🗒
 export const useLoginForm = makeFormStore({
   firstName: { valueType: "text", defaultValidators: ["required"] },
-  lastName: { valueType: "text", defaultValidators: ["required"] },
+  lastName: { valueType: "text" },
 });
 
+export const useSignupForm = makeFormStore({
+  email: { valueType: "text", defaultValidators: ["required"] },
+  password: { valueType: "text", defaultValidators: ["required"] },
+});
+
+
+// Add all form stores keyed by form name
+const formStores = { login: useLoginForm, signup: useSignupForm };
+
+// Get forms hook
+export const { useFormInput } = makeFormHooks(formStores);
+
+// Get forms types
+type FormStoresHelperTypes = MakeFormStoresHelperTypes<typeof formStores>;
+export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
+export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; /
+
 ```
-*Then use the form store with components*
+*Then use with components*
 ```tsx
 type InputId = InputIdFromFormStore<typeof useLoginForm>;
 
-const FormTextInput = ({ inputId }: { inputId: InputId }) => {
-  const updateInput = useLoginForm((state) => state.updateInput);
-  const toggleFocus = useLoginForm((state) => state.toggleFocus);
-  const inputState = useLoginForm((state) => state.inputStates[inputId]);
-  const { value, localErrorTextByErrorType } = inputState;
+type Props<T_FormName, T_InputId> = {
+  inputId: T_InputId;
+  formName: T_FormName;
+  title: string;
+};
+
+const FormInput = <
+  T_FormName extends FormName,
+  T_InputId extends InputIdByFormName[T_FormName]
+>({ formName,inputId,title}: Props<T_FormName, T_InputId>) => {
+
+  const {
+    onChange, value, onFocus, onBlur, inlineErrorTexts, canShowErrors
+  } = useFormInput({ inputId, formName });
+
   return (
-    <>
+    <div>
+      <div>{title}</div>
       <input
-        type="text"
-        value={value}
-        onChange={(event) => updateInput({ inputId, newValue: event.target.value })}
-        onFocus={() => toggleFocus({ inputId, isFocused: true })}
-        onBlur={() => toggleFocus({ inputId, isFocused: false })}
+        {...{ onFocus, onBlur, value }}
+        onChange={(e) => onChange(e.target.value)}
       />
-      <div>{Object.values(localErrorTextByErrorType).join(", ")}</div>
-    </>
+      {canShowErrors && <div>{inlineErrorTexts.join(", ")}</div>}
+    </div>
   );
 };
 
-const LoginForm = () => {
-  const refreshForm = useLoginForm((state) => state.refreshForm);
-  useEffect(refreshForm, []);
+const SignupForm = () => {
+  const refreshForm = useSignupForm((state) => state.refreshForm);
+  const isValid = useSignupForm((state) => state.isValid);
+  useEffect(refreshForm, []); // refresh the form when it becomes visible
   return (
     <>
-      <FormTextInput inputId="email" />
-      <FormTextInput inputId="password" />
+      <FormInput formName="signup" inputId="email" />
+      <FormInput formName="signup" inputId="password" />
     </>
   );
 };
 
 ```
 
-optionally:
-
-- combine multiple form stores to
-    - get a `useFormInput` hook, with extra derived state and access to any form
-    - get helper types like `FormName` and `InputIdByFormName`
-
-*(larger complete example with `useFormInput` further down)*
+*(larger complete example with custom validators and more further down)*
 
 ### Why zustand-forms?
 - *typesafe*, avoids issues with mismatching form names/inputIds, with autocomplete for speed
