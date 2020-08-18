@@ -12,7 +12,7 @@
 ```
 *Then define a form*
 ```ts
-import { makeValidator, makeMakeFormStore, InputIdFromFormApi } from "zustand-forms";
+import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
 
 // Define value types
 const valueTypes = {
@@ -30,7 +30,7 @@ const validatorFunctions = {
 const makeFormStore = makeMakeFormStore(validatorFunctions, valueTypes);
 
 // Make a form 🗒
-export const [useLoginForm, loginFormApi] = makeFormStore({
+export const useLoginForm = makeFormStore({
   firstName: { valueType: "text", defaultValidators: ["required"] },
   lastName: { valueType: "text", defaultValidators: ["required"] },
 });
@@ -38,7 +38,7 @@ export const [useLoginForm, loginFormApi] = makeFormStore({
 ```
 *Then use the form store with components*
 ```tsx
-type InputId = InputIdFromFormApi<typeof loginFormApi>;
+type InputId = InputIdFromFormStore<typeof useLoginForm>;
 
 const FormTextInput = ({ inputId }: { inputId: InputId }) => {
   const updateInput = useLoginForm((state) => state.updateInput);
@@ -94,17 +94,17 @@ optionally:
 
 ### Submitting a form
 ```tsx
-import { signupFormApi } from "forms/signupForm";
+import { useSignupForm } from "forms/signupForm";
 const SignupForm = () => <>
 	    <FormInput inputId="email" formName="signup"   />
 	    <FormInput inputId="newPassword" formName="signup"   />
         <button onClick={() => {
-	       const { formValues } = signupFormApi.getState();
+	       const { formValues } = useSignupForm.getState();
 	       serverApi.submit(formValues);
 	     }}> Submit </button>
       </>
 ```
-This example uses signupFormApi instead of a hook to avoid rerenders when formValues update  
+This example uses getState instead of using the hook to avoid rerenders when formValues update  
 The formValues object contains `{ email: "example@email.org", password: "123" }`
 
 ### Disabling a submit button
@@ -376,7 +376,7 @@ export default makeFormStore;
 ```ts
 import makeFormStore from "./options";
 
-export const [useSignupForm, signupFormApi] = makeFormStore({
+export const useSignupForm = makeFormStore({
   email: {
     valueType: "text",
     defaultValidators: ["required", "email", "requiredLength"],
@@ -415,14 +415,14 @@ export const [useSignupForm, signupFormApi] = makeFormStore({
 ```ts
 // Optional forms helpers
 // can help for an any-form FormInput component
-import { useLoginForm, loginFormApi } from "./loginForm"; // another example form (not shown)
-import { useSignupForm, signupFormApi } from "./signupForm";
+import { useLoginForm } from "./loginForm"; // another example form (not shown)
+import { useSignupForm } from "./signupForm";
 import { makeFormHooks, MakeFormStoresHelperTypes } from "zustand-forms";
 
 // Add all form stores keyed by form name
 const formStores = {
-  login: { hook: useLoginForm, api: loginFormApi },
-  signup: { hook: useSignupForm, api: signupFormApi },
+  login: useLoginForm,
+  signup: useSignupForm,
 };
 
 // Make forms hooks

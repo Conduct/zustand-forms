@@ -1,11 +1,8 @@
-import { UseStore, StoreApi } from "zustand";
+import { UseStore } from "zustand";
 
 type UntypedFormStores = Record<
   string,
-  {
-    hook: UseStore<any>; // NOTE <UntypedFormStore> might work
-    api: StoreApi<any>;
-  }
+  UseStore<any> // NOTE <UntypedFormStore> might work
 >;
 
 export type MakeFormStoresHelperTypes<
@@ -23,4 +20,4 @@ export type MakeFormStoresHelperTypes<
 export type InputIdsFromFormName<
   FormStores extends UntypedFormStores,
   T_FormName extends keyof FormStores
-> = keyof ReturnType<FormStores[T_FormName]["api"]["getState"]>["inputStates"];
+> = keyof ReturnType<FormStores[T_FormName]["getState"]>["inputStates"];

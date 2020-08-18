@@ -2,14 +2,12 @@ import useLatestDefined from "../utils/useLatestDefined";
 import makeMakeFormStore from "../makeFormStore";
 import { InputValueFromOptions } from "../makeFormStore/types";
 import { MakeFormStoresHelperTypes } from "../utils/typeHelpers";
+// @ts-ignore: zustand 3.0 error, could not find a declaration file for module
 import shallow from "zustand/shallow";
 
 type AllFormStoresObject = Record<
   string,
-  {
-    hook: ReturnType<ReturnType<typeof makeMakeFormStore>>[0];
-    api: ReturnType<ReturnType<typeof makeMakeFormStore>>[1];
-  }
+  ReturnType<ReturnType<typeof makeMakeFormStore>>
 >;
 
 export function makeFormHooks<T_AllFormStores extends AllFormStoresObject>(
@@ -23,11 +21,11 @@ export function makeFormHooks<T_AllFormStores extends AllFormStoresObject>(
   type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"];
 
   type AnyFormStoreHookUnion = {
-    [K_FormName in FormName]: FormStores[K_FormName]["hook"];
+    [K_FormName in FormName]: FormStores[K_FormName];
   }[FormName];
 
   type AnyFormStoreApiUnion = {
-    [K_FormName in FormName]: FormStores[K_FormName]["api"];
+    [K_FormName in FormName]: FormStores[K_FormName];
   }[FormName];
 
   type AnyFormStoreHook = UnionToIntersection<AnyFormStoreHookUnion>;
@@ -36,17 +34,15 @@ export function makeFormHooks<T_AllFormStores extends AllFormStoresObject>(
   // using FormStoresHelperTypes["InputIdByFormName"] so it works with the helper types
   type FormStoreHookFromName<
     T_FormName extends FormName
-  > = FormStores[T_FormName]["hook"];
+  > = FormStores[T_FormName];
 
   type InputIdsFromFormName<
     T_FormName extends keyof FormStores
-  > = keyof ReturnType<
-    FormStores[T_FormName]["api"]["getState"]
-  >["inputStates"];
+  > = keyof ReturnType<FormStores[T_FormName]["getState"]>["inputStates"];
 
-  type UnionToIntersection<U> = (U extends any
-  ? (k: U) => void
-  : never) extends (k: infer I) => void
+  type UnionToIntersection<U> = (
+    U extends any ? (k: U) => void : never
+  ) extends (k: infer I) => void
     ? I
     : never;
 
@@ -55,10 +51,10 @@ export function makeFormHooks<T_AllFormStores extends AllFormStoresObject>(
     T_InputId extends InputIdByFormName[T_FormName]
   >({ formName, inputId }: { inputId: T_InputId; formName: T_FormName }) {
     type T_FormStore = ReturnType<
-      typeof allFormStores[typeof formName]["api"]["getState"]
+      typeof allFormStores[typeof formName]["getState"]
     >;
 
-    const useFormStore = allFormStores[formName].hook;
+    const useFormStore = allFormStores[formName];
 
     const [inputState, updateInput, toggleFocus] = useFormStore(
       (state: T_FormStore) => [
