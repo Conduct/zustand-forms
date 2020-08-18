@@ -22,7 +22,9 @@ featuring support for
 // package.json
 "dependencies": { "zustand-forms": "github:Conduct/zustand-forms" }
 ```
-
+to avoid unexpected version updates, a specific commit of the package can be installed,  
+e.g this version works with zustand < 3.0
+`"github:Conduct/zustand-forms#e8c9f1a26033839df961176d151b90ece6c5a3d6"`
 ```ts
 import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
 
