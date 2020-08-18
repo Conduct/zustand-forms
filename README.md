@@ -106,10 +106,10 @@ const SignupForm = () => {
 *(larger complete example with custom validators and more further down)*
 
 ### Why zustand-forms?
-- *typesafe*, avoids issues with mismatching form names/inputIds, with autocomplete for speed
-- *seperated state*, all form state's seperated from layout/views, the latest values are reachable from anywhere
-- *flexible validation*, built in validation, supporting access to parameters and other form state
-- *serverside errors*,  supports adding server errors so all form state is in one place
+- *typesafe*, avoids typos and mismatching form names/inputIds + autocomplete convenience
+- *separated state*, not tied to views or react components, accessible from any function
+- *flexible validation*, supporting custom parameters and checking other form state
+- *serverside errors*, all form state is in one place
 
 ![The same form definition used for mobile and web](nativeandweb.png)  
 *The same form definition can be used for native and web*
