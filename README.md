@@ -4,12 +4,11 @@
 
 ![Example](example.gif)
 
-### Why zustand-forms?
-- *typesafe*, avoids typos and mismatching form names/inputIds + autocomplete convenience
-- *separated state*, not tied to views or react components, accessible from any function
-- *flexible validation*, supporting custom parameters and checking other form state
-- *serverside errors*, all form state is in one place
-- *platform independant*, the same form definitions can be used for native and web
+- ***typesafe***, avoids typos and mismatching form names/inputIds + autocomplete convenience
+- ***separated state***, not tied to views or react components, accessible from any function
+- ***flexible validation***, supporting custom parameters and checking other form state
+- ***serverside errors***, all form state is in one place
+- ***platform independant***, the same form definitions can be used for native and web
 
 
 ### Getting Started
