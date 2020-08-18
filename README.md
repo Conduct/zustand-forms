@@ -115,7 +115,7 @@ const SignupForm = () => {
 
 ```
 
-*(larger complete example with custom validators and more further down)*
+*(larger examples with custom validators and more further down)*
 
 ![The same form definition used for mobile and web](nativeandweb.png)  
 *The same form definition can be used for native and web*
@@ -306,7 +306,7 @@ const validatorFunctions = {
       if (max !== undefined && value.length > max)
         return {
           message: `must be less than ${max + 1} characters`,
-          editedValue: value.substring(0, max),
+          editedValue: value.substring(0, max), // This edits the value directly to be valid
         };
     }
   ),
@@ -318,7 +318,7 @@ const validatorFunctions = {
 
       if (bothValuesArentEmpty)
         return {
-          message: valuesDontMatch ? message : undefined,
+          message: valuesDontMatch ? message : undefined, // if message is undefined there's no error added, but the other input still gets revalidated
           revalidateOtherInputIds: [otherInputId],
         };
     }
