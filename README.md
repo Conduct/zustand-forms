@@ -384,34 +384,34 @@ export const useSignupForm = makeFormStore({
    - 📄App.tsx
 
 
-   ## Validator params helper types
-   *TODO*: Currently not built in, these types can be used to get the custom validators param types, like `{ min: number, max: number }` or `{message: string}` for each validator type
+ ## Validator params helper types
+ *TODO*: Currently not built in, these types can be used to get the custom validators param types, like `{ min: number, max: number }` or `{message: string}` for each validator type
 
-   ```ts
-   type ValidatorFunctions = typeof validatorFunctions;
-   export type ValidatorType = keyof ValidatorFunctions;
+ ```ts
+ type ValidatorFunctions = typeof validatorFunctions;
+ export type ValidatorType = keyof ValidatorFunctions;
 
-   type NoValidatorOptions = {validatorOptions: never};
-   type HasValidatorOptions = {validatorOptions?: any} | {validatorOptions: any};
-   type CheckValidatorOptions<
-     TheParameters extends any
-   > = TheParameters extends HasValidatorOptions
-     ? TheParameters
-     : NoValidatorOptions;
+ type NoValidatorOptions = {validatorOptions: never};
+ type HasValidatorOptions = {validatorOptions?: any} | {validatorOptions: any};
+ type CheckValidatorOptions<
+   TheParameters extends any
+ > = TheParameters extends HasValidatorOptions
+   ? TheParameters
+   : NoValidatorOptions;
 
-   type CustomValidatorParams<
-     T_ValidatorType extends ValidatorType
-   > = CheckValidatorOptions<
-     Parameters<ValidatorFunctions[T_ValidatorType]>[0] // gets the first param object ({value, formState, validatorOptions etc})
-   >['validatorOptions'];
+ type CustomValidatorParams<
+   T_ValidatorType extends ValidatorType
+ > = CheckValidatorOptions<
+   Parameters<ValidatorFunctions[T_ValidatorType]>[0] // gets the first param object ({value, formState, validatorOptions etc})
+ >['validatorOptions'];
 
-   export type ValidatorOptionsByValidatorType = {
-     [P_ValidatorType in ValidatorType]: CustomValidatorParams<P_ValidatorType>;
-   };
+ export type ValidatorOptionsByValidatorType = {
+   [P_ValidatorType in ValidatorType]: CustomValidatorParams<P_ValidatorType>;
+ };
 
-   // Can be useful for custom functionality based on inputState.validatorsOptions
-   export type ValidatorsOptions = Partial<ValidatorOptionsByValidatorType>;
-   ```
+ // Can be useful for custom functionality based on inputState.validatorsOptions
+ export type ValidatorsOptions = Partial<ValidatorOptionsByValidatorType>;
+ ```
 
 
 ## Development
