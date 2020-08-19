@@ -2,7 +2,6 @@ import useLatestDefined from "../utils/useLatestDefined";
 import makeMakeFormStore from "../makeFormStore";
 import { InputValueFromOptions } from "../makeFormStore/types";
 import { MakeFormStoresHelperTypes } from "../utils/typeHelpers";
-// @ts-ignore: zustand 3.0 error, could not find a declaration file for module
 import shallow from "zustand/shallow";
 
 type AllFormStoresObject = Record<
