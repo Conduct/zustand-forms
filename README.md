@@ -64,7 +64,7 @@ export const { useFormInput } = makeFormHooks(formStores);
 // Get forms types
 type FormStoresHelperTypes = MakeFormStoresHelperTypes<typeof formStores>;
 export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
-export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; /
+export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; // InputIdByFormName["login"] -> "email" | "password"
 
 ```
 *Then use with components*
