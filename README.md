@@ -409,10 +409,7 @@ export const useSignupForm = makeFormStore({
      [P_ValidatorType in ValidatorType]: CustomValidatorParams<P_ValidatorType>;
    };
 
-   // Can be useful for a custom input component prop - to define custom validatorOptions per input
-   // for example
-   // CustomFormInputProps = {inputId: InputId, validatorsOptions: ValidatorsOptions}
-   // <CustomFormInput inputId={"nickname"} validatorsOptions={{requiredLength: {min:3, max: 100}}} />
+   // Can be useful for custom functionality based on inputState.validatorsOptions
    export type ValidatorsOptions = Partial<ValidatorOptionsByValidatorType>;
    ```
 
