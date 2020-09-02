@@ -607,6 +607,8 @@ export default function makeMakeFormStore<
                   : currentTime,
               });
 
+              draftState.formValues[inputId] = newInitialValue;
+
               revalidateInputInPlace({ draftState, inputId });
             }
 
@@ -615,6 +617,7 @@ export default function makeMakeFormStore<
             objectAssign(draftState, {
               isCheckable: true,
               timeUpdated: currentTime,
+              timeRefreshed: currentTime,
               timeFocused: 0,
               timeUnfocused: 0,
               hasBeenUnfocused: false,
