@@ -590,8 +590,9 @@ export default function makeMakeFormStore<
                 makeInputsOptions[inputId].defaultIsCheckable ??
                 true;
 
+              get().toggleIsCheckable({ inputId, isCheckable: newIsCheckable });
+
               objectAssign(draftInputState, {
-                isCheckable: newIsCheckable,
                 initialValue: newInitialValue,
                 value: newInitialValue,
                 timeUpdated: currentTime,
@@ -599,12 +600,6 @@ export default function makeMakeFormStore<
                 hasBeenUnfocused: false,
                 isFocused: false,
                 serverErrorTexts: newServerErrors,
-                timeBecameCheckable: newIsCheckable
-                  ? currentTime
-                  : draftInputState.timeBecameCheckable,
-                timeBecameUncheckable: newIsCheckable
-                  ? draftInputState.timeBecameUncheckable
-                  : currentTime,
               });
 
               draftState.formValues[inputId] = newInitialValue;
