@@ -449,7 +449,7 @@ export default function makeMakeFormStore<
         allInputIds: inputIds,
         localErrorInputIds: [],
         serverErrorInputIds: [],
-        checkableInputIds: [],
+        checkableInputIds: [...inputIds],
         focusedInputId: "",
         inputStates: initialInputStates,
         formValues: initialFormValues,
@@ -606,11 +606,13 @@ export default function makeMakeFormStore<
 
               revalidateInputInPlace({ draftState, inputId });
             }
+            const checkableInputIds = getCheckableInputIds(draftState);
 
             updateDraftFormValidationState(draftState);
 
             objectAssign(draftState, {
               isCheckable: true,
+              checkableInputIds,
               timeUpdated: currentTime,
               timeRefreshed: currentTime,
               timeFocused: 0,
