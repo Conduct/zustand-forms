@@ -20,7 +20,7 @@ featuring support for
 
 ```ts
 // package.json
-"dependencies": { "zustand-forms": "github:Conduct/zustand-forms#v1.0.2" }
+"dependencies": { "zustand-forms": "github:Conduct/zustand-forms#v1.0.3" }
 ```
 to avoid unexpected version updates, a specific tag of the package can be installed,  
 e.g this version works with zustand < 3.0
