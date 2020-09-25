@@ -381,6 +381,41 @@ export default function makeMakeFormStore<
       });
     }
 
+    function toggleIsCheckableInPlace({
+      inputId,
+      draftState,
+      newIsCheckable,
+    }: {
+      inputId: Form_InputId;
+      draftState: FormStore;
+      newIsCheckable: boolean;
+    }) {
+      const currentTime = Date.now();
+
+      const draftInputState = getDraftInputState(draftState, inputId);
+      const previousIsCheckable = draftInputState.isCheckable;
+
+      draftInputState.isCheckable = newIsCheckable;
+
+      revalidateInputInPlace({ draftState, inputId });
+
+      if (newIsCheckable !== previousIsCheckable) {
+        const checkableInputIds = getCheckableInputIds(draftState);
+
+        objectAssign(draftState, {
+          checkableInputIds: checkableInputIds,
+          isCheckable: checkableInputIds.length > 0,
+        });
+
+        if (newIsCheckable) {
+          draftInputState.timeBecameCheckable = currentTime;
+        } else {
+          draftInputState.timeBecameUncheckable = currentTime;
+        }
+      }
+      updateDraftFormValidationState(draftState);
+    }
+
     // ------------------------------------------
     //  Initialising zustand store states
     // ------------------------------------------
@@ -529,33 +564,8 @@ export default function makeMakeFormStore<
           }
         },
         toggleIsCheckable({ inputId, isCheckable: newIsCheckable }) {
-          const baseState = get();
-          const { inputStates } = baseState;
-          const baseInputState = inputStates[inputId];
-          const currentTime = Date.now();
-
           _setImmutable((draftState) => {
-            const draftInputState = getDraftInputState(draftState, inputId);
-
-            draftInputState.isCheckable = newIsCheckable;
-
-            revalidateInputInPlace({ draftState, inputId });
-
-            if (newIsCheckable !== baseInputState.isCheckable) {
-              const checkableInputIds = getCheckableInputIds(draftState);
-
-              objectAssign(draftState, {
-                checkableInputIds: checkableInputIds,
-                isCheckable: checkableInputIds.length > 0,
-              });
-
-              if (newIsCheckable) {
-                draftInputState.timeBecameCheckable = currentTime;
-              } else {
-                draftInputState.timeBecameUncheckable = currentTime;
-              }
-            }
-            updateDraftFormValidationState(draftState);
+            toggleIsCheckableInPlace({ draftState, inputId, newIsCheckable });
           });
         },
         refreshForm(
@@ -590,7 +600,7 @@ export default function makeMakeFormStore<
                 makeInputsOptions[inputId].defaultIsCheckable ??
                 true;
 
-              get().toggleIsCheckable({ inputId, isCheckable: newIsCheckable });
+              toggleIsCheckableInPlace({ inputId, newIsCheckable, draftState });
 
               objectAssign(draftInputState, {
                 initialValue: newInitialValue,
