@@ -1,6 +1,6 @@
 {
   "name": "zustand-forms",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "**fast typesafe form states as zustand stores**",
   "main": "./lib/index.js",
   "scripts": {
@@ -53,8 +53,8 @@
     "arrowParens": "always"
   },
   "dependencies": {
-    "immer": "^7.0.7",
-    "zustand": "^3.1.2"
+    "immer": "^8.0.0",
+    "zustand": "^3.2.0"
   },
   "peerDependencies": {
     "react": "^16.13.1"
