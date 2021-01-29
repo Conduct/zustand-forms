@@ -374,7 +374,7 @@ or `{message: string}` for "required"
 *a generic FormInput component that supports any form*
 
 ```ts
-import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
+import { makeValidator, makeMakeFormStore, InputIdFromFormStore, makeFormHooks } from "zustand-forms";
 
 // Define value types
 const valueTypes = {
