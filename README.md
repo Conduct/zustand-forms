@@ -1,7 +1,6 @@
 
 
 # zustand forms
-*form state*
 
 ![Example](example.gif)
 
@@ -18,20 +17,22 @@ featuring
 
 ### Getting Started
 
+Install package
 ```ts
 // package.json
 "dependencies": { "zustand-forms": "github:Conduct/zustand-forms#v1.0.6" }
 ```
 
+Define value types and validators 
 ```ts
 import { makeValidator, makeMakeFormStore } from "zustand-forms";
 
-// Define values types and validators 
 const valueTypes = { text: { blankValue: "" } };
 const validators = { required: makeValidator(({ value }) => !value ? "Required field" : undefined )};
 const makeFormStore = makeMakeFormStore(validators, valueTypes);
-
-// Define a form 🗒
+```
+Define a form 🗒
+```
 const useLoginForm = makeFormStore({
   firstName: { valueType: "text", defaultValidators: ["required"] },
   lastName: { valueType: "text" },
