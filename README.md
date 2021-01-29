@@ -32,7 +32,7 @@ const validators = { required: makeValidator(({ value }) => !value ? "Required f
 const makeFormStore = makeMakeFormStore(validators, valueTypes);
 ```
 Define a form 🗒
-```
+```ts
 const useLoginForm = makeFormStore({
   firstName: { valueType: "text", defaultValidators: ["required"] },
   lastName: { valueType: "text" },
@@ -120,7 +120,7 @@ const validatorFunctions = {
 
 ### Custom value types
 For values with multiple properties  like `beachBall: { color: "green", size: 30 }`.
-```
+```ts
 const valueTypes = {
   text: { blankValue: "" },
   rotation: { blankValue: { x: 0, y: 0, z: 0 } },
@@ -230,7 +230,7 @@ Supporting custom validators, stricter types , and simpler input definitions, bu
 ## Validators
 
 
-```js
+```ts
 // Define validator functions
 import { makeValidator as make, makeValidatorUtils } from "zustand-forms";
 
@@ -373,7 +373,7 @@ or `{message: string}` for "required"
 ## Generic FormInput
 *a generic FormInput component that supports any form*
 
-```
+```ts
 import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
 
 // Define value types
