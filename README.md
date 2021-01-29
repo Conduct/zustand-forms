@@ -415,7 +415,7 @@ export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
 export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; // InputIdByFormName["login"] -> "email" | "password"
 ```
 using with components
-```
+```ts
 type Props<T_FormName, T_InputId> = {
   inputId: T_InputId;
   formName: T_FormName;
