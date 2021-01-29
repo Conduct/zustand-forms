@@ -4,8 +4,8 @@
 
 ![Example](example.gif)
 
-- ***typesafe*** -  autocomplete everything
-- ***zustand*** - form = plain zustand store, access and update state anywhere
+- ***typesafe*** -  everything autocompleteable
+- ***zustand*** - a form = plain zustand store, access and update state anywhere
 
 
 featuring
