@@ -1,126 +1,67 @@
 
+
 # zustand forms
-*fast typesafe form states as zustand stores*
+*form state*
 
 ![Example](example.gif)
 
-### why?
+- ***typesafe*** -  autocomplete everything
+- ***zustand*** - form = plain zustand store, access and update state anywhere
 
-- ***typesafe*** -  avoids typos and mismatching form names/inputIds + autocomplete convenience
-- ***separated state*** - not tied to views or react components, accessible from any function
-- ***flexible validation*** - supports custom parameters and checking other form state
-- ***platform independant*** - the same form definitions can be used for native and web
 
-featuring support for
-- ***serverside errors*** - all form state in one place
-- ***dynamic forms*** - toggle validators when showing/hiding inputs in a form, e.g `email` >next>  `password`
-- ***custom functionality*** - accessible low level state like `timeUpdated` for adding custom logic
+featuring
+- ***flexiable validation*** 
+- ***server errors*** 
+- ***toggling inputs*** 
+- ***any platform*** - no components provided, works with regular controlled inputs
+- ***low level access*** - read meta state like `timeUpdated` for custom functionality
 
 ### Getting Started
 
 ```ts
 // package.json
-"dependencies": { "zustand-forms": "github:Conduct/zustand-forms#v1.0.5" }
+"dependencies": { "zustand-forms": "github:Conduct/zustand-forms#v1.0.6" }
 ```
-to avoid unexpected version updates, a specific tag of the package can be installed,  
-e.g this version works with zustand < 3.0
-`"github:Conduct/zustand-forms#v0.3.6"`
+
 ```ts
-import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
+import { makeValidator, makeMakeFormStore } from "zustand-forms";
 
-// Define value types
-const valueTypes = {
-  text: { blankValue: "" },
-  number: { blankValue: 0 },
-  boolean: { blankValue: false },
-};
-// Define validators
-const validatorFunctions = {
-  required: makeValidator(({ value }) =>
-    !value ? "Required field" : undefined
-  ),
-};
+// Define values types and validators 
+const valueTypes = { text: { blankValue: "" } };
+const validators = { required: makeValidator(({ value }) => !value ? "Required field" : undefined )};
+const makeFormStore = makeMakeFormStore(validators, valueTypes);
 
-// Define some forms 🗒
-const makeFormStore = makeMakeFormStore(validatorFunctions, valueTypes);
-
-export const useLoginForm = makeFormStore({
+// Define a form 🗒
+const useLoginForm = makeFormStore({
   firstName: { valueType: "text", defaultValidators: ["required"] },
   lastName: { valueType: "text" },
 });
 
-export const useSignupForm = makeFormStore({
-  email: { valueType: "text", defaultValidators: ["required"] },
-  password: { valueType: "text", defaultValidators: ["required"] },
-});
-// These form hooks can be used as-is, or a combined hook can be made below
-
-// Add all form stores keyed by form name
-const formStores = { login: useLoginForm, signup: useSignupForm };
-
-// Get forms hook
-export const { useFormInput } = makeFormHooks(formStores);
-
-// Get forms types
-type FormStoresHelperTypes = MakeFormStoresHelperTypes<typeof formStores>;
-export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
-export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; // InputIdByFormName["login"] -> "email" | "password"
-
-```
-*Then use with components*
-```tsx
-
-type Props<T_FormName, T_InputId> = {
-  inputId: T_InputId;
-  formName: T_FormName;
-  title: string;
-};
-
-const FormInput = <
-  T_FormName extends FormName,
-  T_InputId extends InputIdByFormName[T_FormName]
->({ formName,inputId,title}: Props<T_FormName, T_InputId>) => {
-
-  const {
-    onChange, value, onFocus, onBlur, inlineErrorTexts, canShowErrors
-  } = useFormInput({ inputId, formName });
-
-  return (
-    <div>
-      <div>{title}</div>
-      <input
-        {...{ onFocus, onBlur, value }}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      {canShowErrors && <div>{inlineErrorTexts.join(", ")}</div>}
-    </div>
-  );
-};
-
-const SignupForm = () => {
-  const refreshForm = useSignupForm((state) => state.refreshForm);
-  const isValid = useSignupForm((state) => state.isValid);
+function LoginForm() {
+  const {refreshForm, updateInput, formValues, isValid} = useLoginForm();
   useEffect(refreshForm, []); // refresh the form when it becomes visible
+
   return (
     <>
-      <FormInput formName="signup" inputId="email" />
-      <FormInput formName="signup" inputId="password" />
-      <button
-        onClick={()=> anApi.signup(useSignupForm.getState().formValues)}
-        disabled={!isValid}
-      >
-        submit
-      </button>
+      <TextInput
+        value={formValues.email}
+        onChange={(newValue) => updateInput({inputId: 'email', newValue})}
+      />
+      <TextInput
+        value={formValues.password}
+        onChange={(newValue) => updateInput({inputId: 'password', newValue})}
+      />
+      <Button disabled={!isValid}>Submit</Button>
     </>
   );
-};
-
+}
 ```
+
 
 *(larger examples with custom validators and more further down)*
 
 ![The same form definition used for mobile and web](nativeandweb.png)  
-*The same form definition can be used for native and web*
+*native + web*
 
 # Docs
 
@@ -214,55 +155,64 @@ const validatorFunctions = {
 };
 ```
 
-# States
+# Form store
+What's available in `getLoginForm().getState()`
+### state
+|    | |  
+| ---------- | ------------- |
+| inputStates      | { firstName: `InputState`, lastName: `InputState` }  |
+| formValues  |   { firstName: "Sam", lastName: "Doe" } |
+| - |  |
+| allInputIds      | ["firstName", "lastName"]
+|  localErrorInputIds  |  
+|  serverErrorInputIds  |   |
+|  checkableInputIds  |   |
+|  focusedInputId  |  "firstName" |
+| -|  |
+| timeUpdated      |  1596601463296 |  
+|  timeRefreshed  |   |  
+|  timeFocused  |   |  
+|  timeUnfocused  |   |  
+| -|  |
+| isValidLocal      |   |  
+|  isValidServer  |  if there are any current server errors |  
+|  isValid  |   |  
+|  isEdited  |   |  
+|  hasBeenUnfocused  |   |  
+|  isFocused  |   |  
+|  isCheckable  | if the validators should run, usually for hidden inputs  |  
 
-### Input state
-|  |   | ℹ️ |  
-| - | ---------- | ------------- |
-| | inputId  | "firstName"   |
-|***values***  | value      | the current value  
-| | initialValue  |   
-| | valueType  |   | "text" |
-|***validators***  | validatorTypes      | ["requiredLength"]  |
-| | validatorsOptions  |   { requiredLength: { max: 10 } } |
-|***current errors***  | localErrorTypes  |  [“requiredLength”]   |
-| | localErrorTextByErrorType  |  { requiredLength: "Must be under 11 letters" }  |
-| | serverErrorTexts  | [“Name already exists”]   |  
-|***times***  | timeUpdated      |  1596601463296 |  
-| | timeBecameCheckable  |   |  
-| | timeBecameUncheckable  |   |  
-| | timeFocused  |   |  
-| | timeUnfocused  |   |  
-|***booleans***  | isValidLocal      |   |  
-| | isValidServer  |  if there are any current server errors |  
-| | isValid  |   |  
-| | isEdited  |   |  
-| | hasBeenUnfocused  |   |  
-| | isFocused  |   |  
-| | isCheckable  | if the validators should run, usually for hidden inputs  |  
+
+### InputState
+*what's inside `getLoginForm().getState().inputStates.login`*
+|    |  |  
+|  ---------- | ------------- |
+|  inputId  | "firstName"   |
+| value      | the current value  
+|  initialValue  |   
+|  valueType  |   | "text" |
+| validatorTypes      | ["requiredLength"]  |
+|  validatorsOptions  |   { requiredLength: { max: 10 } } |
+| localErrorTypes  |  [“requiredLength”]   |
+|  localErrorTextByErrorType  |  { requiredLength: "Must be under 11 letters" }  |
+|  serverErrorTexts  | [“Name already exists”]   |  
+| -|  |
+| timeUpdated      |  1596601463296 |  
+|  timeBecameCheckable  |   |  
+|  timeBecameUncheckable  |   |  
+|  timeFocused  |   |  
+|  timeUnfocused  |   |  
+| -|  |
+| isValidLocal      |   |  
+|  isValidServer  |  if there are any current server errors |  
+|  isValid  |   |  
+|  isEdited  |   |  
+|  hasBeenUnfocused  |   |  
+|  isFocused  |   |  
+|  isCheckable  | if the validators should run, usually for hidden inputs  |  
 
 
-### Form state
-|  |   | |  
-| - | ---------- | ------------- |
-|***inputIds***  | allInputIds      | ["firstName", "lastName"]
-| | localErrorInputIds  |  
-| | serverErrorInputIds  |   |
-| | checkableInputIds  |   |
-| | focusedInputId  |  "firstName" |
-|***input states***  | inputStates      | { firstName: `InputState` }  |
-| | formValues  |   { firstName: "Sam" } |
-|***times***  | timeUpdated      |  1596601463296 |  
-| | timeRefreshed  |   |  
-| | timeFocused  |   |  
-| | timeUnfocused  |   |  
-|***booleans***  | isValidLocal      |   |  
-| | isValidServer  |  if there are any current server errors |  
-| | isValid  |   |  
-| | isEdited  |   |  
-| | hasBeenUnfocused  |   |  
-| | isFocused  |   |  
-| | isCheckable  | if the validators should run, usually for hidden inputs  |  
+
 
 
 ### Form actions
@@ -273,8 +223,10 @@ const validatorFunctions = {
 | | toggleIsCheckable  |  `toggleIsCheckable(`{`inputId`, `isCheckable`}`)` | use for hidden inputs
 | | refreshForm  | `refreshForm(` `initialValuesByInputId`, `isCheckableByInputId`, `serverErrorsByInputId` `)`  | use when form components mount with `useEffect(, [])`
 
+# Advanced use
+Supporting custom validators, stricter types , and simpler input definitions, but requires more boilerplate
 
-## Example validators
+## Validators
 
 
 ```js
@@ -287,8 +239,9 @@ const {
   stringMatches,
   stringDoesntMatch,
 } = makeValidatorUtils({
-  aCustomRegex: /\s\S/,
-});
+  // custom regex, 'email' and others included by default
+  anyUrl:  /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
+  });
 
 const validatorFunctions = {
   email: make<{}>(({ value }) => {
@@ -368,7 +321,7 @@ export const useSignupForm = makeFormStore({
 });
 ```
 
-## Example folder structure
+## Folder structure
 
 - 📂src
   - 📂forms
@@ -385,7 +338,10 @@ export const useSignupForm = makeFormStore({
 
 
  ## Validator params helper types
- *TODO*: Currently not built in, these types can be used to get the custom validators param types, like `{ min: number, max: number }` or `{message: string}` for each validator type
+Currently not built in, these types can be used to get the custom validators param types for each validator, 
+
+e.g  `{ min: number, max: number }` for "requiredLength", 
+or `{message: string}` for "required"
 
  ```ts
  type ValidatorFunctions = typeof validatorFunctions;
@@ -413,10 +369,102 @@ export const useSignupForm = makeFormStore({
  export type ValidatorsOptions = Partial<ValidatorOptionsByValidatorType>;
  ```
 
+## Generic FormInput
+*a generic FormInput component that supports any form*
 
-## Development
-For a quick way to edit this package, add `📂src` to your project as a renamed local folder like `📂zustand-forms-dev`, and replacing imports from `"zustand-forms"` to `"zustand-forms-dev"`.  
-Enabling `"baseUrl":` in `tsconfig.json` allows non-relative imports  
+```
+import { makeValidator, makeMakeFormStore, InputIdFromFormStore } from "zustand-forms";
+
+// Define value types
+const valueTypes = {
+  text: { blankValue: "" },
+  number: { blankValue: 0 },
+  boolean: { blankValue: false },
+};
+// Define validators
+const validatorFunctions = {
+  required: makeValidator(({ value }) =>
+    !value ? "Required field" : undefined
+  ),
+};
+
+// Define some forms 🗒
+const makeFormStore = makeMakeFormStore(validatorFunctions, valueTypes);
+
+export const useLoginForm = makeFormStore({
+  firstName: { valueType: "text", defaultValidators: ["required"] },
+  lastName: { valueType: "text" },
+});
+
+export const useSignupForm = makeFormStore({
+  email: { valueType: "text", defaultValidators: ["required"] },
+  password: { valueType: "text", defaultValidators: ["required"] },
+});
+// These form hooks can be used as-is, or a combined hook can be made below
+
+// Add all form stores keyed by form name
+const formStores = { login: useLoginForm, signup: useSignupForm };
+
+// Get forms hook
+export const { useFormInput } = makeFormHooks(formStores);
+
+// Get forms types
+type FormStoresHelperTypes = MakeFormStoresHelperTypes<typeof formStores>;
+export type FormName = FormStoresHelperTypes["FormName"]; // "login" | "signup"
+export type InputIdByFormName = FormStoresHelperTypes["InputIdByFormName"]; // InputIdByFormName["login"] -> "email" | "password"
+```
+using with components
+```
+type Props<T_FormName, T_InputId> = {
+  inputId: T_InputId;
+  formName: T_FormName;
+  title: string;
+};
+
+const FormInput = <
+  T_FormName extends FormName,
+  T_InputId extends InputIdByFormName[T_FormName]
+>({ formName,inputId,title}: Props<T_FormName, T_InputId>) => {
+
+  const {
+    onChange, value, onFocus, onBlur, inlineErrorTexts, canShowErrors
+  } = useFormInput({ inputId, formName });
+
+  return (
+    <div>
+      <div>{title}</div>
+      <input
+        {...{ onFocus, onBlur, value }}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {canShowErrors && <div>{inlineErrorTexts.join(", ")}</div>}
+    </div>
+  );
+};
+
+const SignupForm = () => {
+  const refreshForm = useSignupForm((state) => state.refreshForm);
+  const isValid = useSignupForm((state) => state.isValid);
+  useEffect(refreshForm, []); // refresh the form when it becomes visible
+  return (
+    <>
+      <FormInput formName="signup" inputId="email" />
+      <FormInput formName="signup" inputId="password" />
+      <button
+        onClick={()=> anApi.signup(useSignupForm.getState().formValues)}
+        disabled={!isValid}
+      >
+        submit
+      </button>
+    </>
+  );
+};
+```
+
+
+# Library development
+For a quick way to edit this package, add `📂src` to your project as a renamed local folder like `📂zustand-forms-dev`, and replace imports from `"zustand-forms"` to `"zustand-forms-dev"`.  
+( Enabling `"baseUrl":` in `tsconfig.json` allows non-relative imports  )
 
 After making changes, update the files in this libraries src folder, update the version number in package.json, remove node_modules and lib folders, and run `npm install`.  
 
